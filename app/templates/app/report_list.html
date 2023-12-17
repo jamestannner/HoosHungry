@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    <title>Hoos Hungry - Restaurant Reports</title>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h2 class="mt-4 mb-4">Restaurant Reports</h2>
+
+            {% if reports %}
+                <ul class="list-group">
+                    {% for report in reports %}
+                        <li class="list-group-item">
+                            <p>
+                                {{ report }}
+                            </p>
+                            <p class="small text-muted">Timestamp: {{ report.timestamp }}</p>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No reports available.</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

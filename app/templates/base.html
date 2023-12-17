@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {% block title %}
+    <title>Hoos Hungry</title>
+    {% endblock %}
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    {% load socialaccount %}
+    {% load static %}
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!-- One file includes all the Font Awesome Free icons and utilities -->
+    <link href="{% static 'fontawesomefree/css/all.min.css' %}" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="{% static 'css/header.css' %}">
+</head>
+
+<body class="bg-color">
+    {% block header %}
+    <nav class="navbar navbar-expand-lg navbar-dark med-blue stick-top">
+        <div class="container-fluid">
+            <a class="navbar-brand nav-link-hover" href="{% url 'app:index' %}"><b>Hoos Hungry</b></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+                    <li class="nav-item mx-1">
+                        <a class="nav-link nav-link-hover" href="{% url 'app:index' %}"><i class="fa-solid fa-house"></i>  Home</a>
+                    </li>
+                    <li class="nav-item mx-1">
+                        <a class="nav-link nav-link-hover" href="{% url 'app:restaurants' %}"><i class="fa-solid fa-utensils"></i>  Restaurants</a>
+                    </li>
+                    <li class="nav-item mx-1">
+                        <a class="nav-link nav-link-hover" href="{% url 'app:create_request' %}"><i class="fa-solid fa-plus"></i>  Make a Request</a>
+                    </li>
+                    <li class="nav-item mx-1">
+                        <a class="nav-link nav-link-hover" href="{% url 'app:review_form' %}"><i class="fa-solid fa-pencil"></i>  Write a Review</a>
+                    </li>
+                    <li class="nav-item mx-1">
+                        <a class="nav-link nav-link-hover" href="{% url 'app:report_create' %}"><i class="fa-solid fa-circle-info"></i>  Leave a Report</a>
+                    </li>
+            
+                    <li class="nav-item mx-1">
+                        {% if user.is_authenticated %}
+                        <a class="nav-link nav-link-hover" href="{% url 'app:logout' %}">Sign out</a>
+                        {% else %}
+                        {% csrf_token %}
+                        <a class="nav-link nav-link-hover" href="{% provider_login_url 'google' %}?next=/">Sign in</a>
+                        {% endif %}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    {% endblock %}
+    <div class="container mt-4">
+        {% block content %}
+        {% endblock %}
+    </div>
+</body>
+
+</html>

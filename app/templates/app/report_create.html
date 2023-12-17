@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% load bootstrap5 %}
+
+{% block title %}
+    <title>Restaurant Report</title>
+{% endblock %}
+
+{% block content %}
+    {% if request.user.is_authenticated %}
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <h2 class="mt-4 mb-4">Leave a Restaurant Report</h2>
+                <form method="post" action="{% url 'app:report_create' %}">
+                    {% csrf_token %}
+                    {% bootstrap_form form layout='horizontal' %}
+                    <button type="submit" class="btn btn-primary">Submit Report</button>
+                </form>
+
+            </div>
+        </div>
+        {% if success %}
+        <div id="success-alert" class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+            Report successfully submitted!
+        </div>
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+        <script>
+            $(document).ready(function(){
+                setTimeout(function(){
+                    $("#success-alert").fadeOut("slow", function(){
+                        $(this).alert('close');
+                    });
+                }, 1000);
+            });
+        </script>
+        {% endif %}
+    {% else %}
+        <h2 class="mt-4 mb-4">You must be logged in to create a report.</h2>
+    {% endif %}
+{% endblock %}

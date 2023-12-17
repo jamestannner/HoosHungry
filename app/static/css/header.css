@@ -1,0 +1,27 @@
+.bg-color {
+    background-color: #F2F3F8;
+}
+
+.med-blue {
+    background-color: #232D4B;
+}
+
+.dark-blue {
+    background-color: #141E3C;
+}
+
+.nav-link-hover {
+    color: #FFFFFF !important;
+}
+
+.nav-link-hover:hover {
+    color: #E57200 !important;
+}
+
+.restaurant-card {
+    transition: background-color 0.3s;
+}
+
+.restaurant-card:hover {
+    background-color: #EEEEEE;
+}

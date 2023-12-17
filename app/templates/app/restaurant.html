@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">{{ restaurant.name }}</h2>
+        </div>
+        <div class="card-body">
+            <p class="card-text"><strong>Address:</strong> {{ restaurant.address }}</p>
+            <p class="card-text"><strong>Contact Info:</strong> {{ restaurant.contact_info }}</p>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Menu</h2>
+        </div>
+        <div class="card-body">
+            <p class="card-text">{{ restaurant.menu_text }}</p>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Reports</h2>
+        </div>
+        <div class="card-body row">
+            <div class="col-md-3">
+                <p class="card-text d-inline-block">Average Cleanliness: {{ restaurant.get_average_cleanliness }}</p>
+            </div>
+            <div class="col-md-3">
+                <p class="card-text">Average Crowdedness: {{ restaurant.get_average_crowdedness }}</p>
+            </div>
+            <div class="col-md-3">
+                <p class="card-text">Average Friendliness: {{ restaurant.get_average_friendliness }}</p>
+            </div>
+            <div class="col-md-3">
+                <p class="card-text">Average Menu Quality: {{ restaurant.get_average_menu_quality }}</p>
+            </div>
+        </div>
+    </div>
+    <!-- Reviews Grid -->
+    <div class="row">
+        {% for review in restaurant.reviews.all %}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">{{ review.user }}</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Star Ratings -->
+                    <div class="mb-3">
+                        {% for star in "12345"|make_list %}
+                            {% if forloop.counter <= review.rating %}
+                                <i class="fas fa-star text-warning"></i>
+                            {% else %}
+                                <i class="far fa-star text-muted"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <p class="card-text">
+                        {{ review.review_text }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <br>
+    <div>
+        <a href="{% url 'app:create_request_filled' restaurant.id %}" class="btn btn-primary">Request a Change</a>
+    </div>
+    {% if is_admin %}
+    <div>
+        <p>You are an admin for this restaurant! Click <a href="{% url 'app:restaurant_update' restaurant.id %}">here</a> to view requests</p>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

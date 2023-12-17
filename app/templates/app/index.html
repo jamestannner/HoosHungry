@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+{% block title %}
+<title>Welcome to HoosHungry!</title>
+{% endblock %}
+
+{% block content %}
+<div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+    <div class="inner">
+        <h1 class="cover-heading">Welcome to HoosHungry!</h1>
+
+        {% if request.user.is_authenticated %}
+            <p class="lead">Hi, {{ request.user.email }}!</p>
+
+            {% if request.user.is_staff %}
+                <p class="lead"><a href="{% url 'admin:index' %}" class="btn btn-lg btn-secondary">Admin</a></p>
+            {% else %}
+                <p class="lead">Enjoy exploring restaurants around grounds!</p>
+            {% endif %}
+
+        {% else %}
+            <p class="lead">You are not logged in. Join us to explore delicious eateries around grounds!</p>
+        {% endif %}
+    </div>
+    <div id="map" style="height: 600px; width: 100%;"></div>
+    <script>
+        function initMap() {  
+            // default start latlang is UVA
+            let myLatlng = { lat: 38.03559898735053, lng: -78.50341122634278 };
+            
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 15,
+                center: myLatlng,
+            });
+            
+            var restaurants = {{ restaurants|safe }};
+            var openInfoWindow = null;
+
+            google.maps.event.addListener(map, 'click', function() {
+                openInfoWindow.close();
+            });
+
+            // Loop through all restaurants to place markers
+            for (var i = 0; i < restaurants.length; i++) {
+                var myResLatlng = {
+                    lat: restaurants[i].latitude,
+                    lng: restaurants[i].longitude,
+                };
+                // Create marker
+                const marker = new google.maps.Marker({
+                    position: myResLatlng,
+                    map: map,
+                    title: restaurants[i].name  // This will be shown when hovering over the marker
+                });
+                // Create info window
+                const infoString =
+                '<div id="content">' +
+                    '<div id="siteNotice">' +
+                    "</div>" +
+                    '<h1 id="firstHeading" class="firstHeading">' + restaurants[i].name + '</h1>' +
+                    '<div id="bodyContent">' +
+                    '<p>' + restaurants[i].address + '</p>' +
+                    '<p><a href="' + restaurants[i].contact_info + '">Website</a></p>' +
+                    '<p>Rating: ' + restaurants[i].avg_rating + '</p>' +
+                    '<p><a href="' + 'restaurants/' + restaurants[i].pk + '">More Details</a></p>' +
+                    "</div>" +
+                    "</div>";
+                const infowindow = new google.maps.InfoWindow({
+                    content: infoString,
+                    ariaLabel: restaurants[i].name,
+                });
+                // Add click listener to marker
+                marker.addListener("click", () => {
+                    if (openInfoWindow) {
+                        openInfoWindow.close();
+                    }
+                    infowindow.open(map, marker);
+                    openInfoWindow = infowindow;
+                });
+            }
+
+
+            jumpToMeButton = document.createElement("button");
+            jumpToMeButton.classList.add("btn-sm", "btn-primary", "m-3");
+            jumpToMeButton.textContent = "Jump to My Location  ";
+
+            const locationIcon = document.createElement("i");
+            locationIcon.classList.add("fa-solid", "fa-location-crosshairs");
+            jumpToMeButton.appendChild(locationIcon);
+
+            map.controls[google.maps.ControlPosition.TOP_CENTER].push(jumpToMeButton);
+
+            jumpToMe = new google.maps.InfoWindow();
+            locationMarker = new google.maps.Marker({
+                map : map,
+                icon : {
+                    path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                    scale: 5,
+                    fillColor: "#2764f2",
+                    fillOpacity: 1,
+                    strokeWeight: 0,
+                    rotation : 45,
+                },
+            });
+
+
+
+            if (window.navigator.geolocation) {
+                const successCallback = (position) => {
+                    if (openInfoWindow) {
+                        openInfoWindow.close();
+                    }
+
+                    myLatlng = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                    };
+                    locationMarker.setPosition(myLatlng);
+                    jumpToMe.setPosition(myLatlng);
+                    jumpToMe.setContent("You are here");
+                    jumpToMe.open(map);
+                    openInfoWindow = jumpToMe;
+
+                    map.panTo(myLatlng);
+                };
+                const errorCallback = (error) => {
+                    jumpToMeButton.textContent = "Error getting your location";
+                    console.log(error);
+                };
+                jumpToMeButton.addEventListener("click", () => window.navigator.geolocation.getCurrentPosition(successCallback, errorCallback))
+            } else {
+                jumpToMeButton.addEventListener("click", () => {
+                    jumpToMe.setPosition(myLatlng);
+                    jumpToMe.setContent("Geolocation not supported by your browser");
+                    jumpToMe.open(map);
+                    map.setCenter(myLatlng);
+                });
+            }
+
+        }
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&callback=initMap"></script>
+    {% if messages %}
+        <div class="modal" id="msg-popup" style="display : block">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                        <h4 class="modal-title">New Messages</h4>
+                        <button id="close-msg-popup" type="button">&times;</button>
+                    </div>
+
+                    <!-- Modal Body -->
+                    <div class="modal-body overflow-auto" style="max-height: 60vh;">
+                        {% for message in messages %}
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title">Your Request for {{message.for_what}} was Rejected</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text">Rejection Message: {{ message }}</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Modal Footer -->
+                    <div class="modal-footer">
+                        <form id="read-messages" method="post" action="{% url 'app:read_messages' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary" aria-label="Mark All As Read">Mark All As Read</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+            document.getElementById("close-msg-popup").addEventListener("click", function() {
+                document.getElementById("msg-popup").style.display = "none";
+            });
+        </script>
+    {% endif %}
+</div>
+{% endblock %}
